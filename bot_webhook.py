@@ -12,6 +12,7 @@ COME FUNZIONA IL DEPLOY: vedi le istruzioni nella chat.
 """
 
 import os
+import asyncio
 from telegram import Update, WebAppInfo, KeyboardButton, ReplyKeyboardMarkup
 from telegram.ext import Application, CommandHandler, ContextTypes
 
@@ -38,6 +39,13 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 def main() -> None:
+    # Python 3.14 non crea piu' automaticamente un event loop sul thread principale:
+    # lo creiamo esplicitamente, altrimenti run_webhook fallisce con RuntimeError.
+    try:
+        asyncio.get_event_loop()
+    except RuntimeError:
+        asyncio.set_event_loop(asyncio.new_event_loop())
+
     app = Application.builder().token(BOT_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
 
